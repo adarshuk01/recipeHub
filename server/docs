@@ -1,0 +1,6 @@
+PORT=5000
+MONGO_URI=mongodb+srv://adarshukumar90:WphHXJwnMdfCXpyA@cluster0.fkgo0yi.mongodb.net/RecipeHub
+JWT_SECRET=hellohow
+CLOUDINARY_CLOUD_NAME=dxrcao3wk
+CLOUDINARY_API_KEY=886475353162163
+CLOUDINARY_API_SECRET=OEyqvyqK6s6Is9Sgq5VIkVwCZZI
