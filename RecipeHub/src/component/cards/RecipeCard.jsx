@@ -11,9 +11,9 @@ function RecipeCard({ recipe }) {
   };
 
   return (
-    <div className="relative bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden max-w-4xl w-full mx-auto">
+    <div className="relative bg-white h-fit rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden max-w-4xl w-full mx-auto">
       {/* --- Fixed Bookmark --- */}
-      <span className="absolute top-2 right-2 lg:bg-transparent  bg-white/70 rounded-2xl p-2 z-30">
+      <span className="absolute top-0 -right-3 lg:bg-transparent  bg-white/70 rounded-2xl p-2 z-30">
       <CiBookmark
         size={26}
         className=" cursor-pointer  text-gray-700 hover:text-gray-900 transition"
@@ -23,19 +23,19 @@ function RecipeCard({ recipe }) {
 
       <div className="flex flex-col sm:flex-row">
         {/* --- Image Section --- */}
-        <div className="relative flex-shrink-0 w-full sm:w-1/3">
+        <Link to={`/recipedetails/${recipe._id}`} className="relative flex-shrink-0 w-full sm:w-1/3">
           <img
             src={recipe?.mainPhoto}
             alt={recipe?.title}
-            className="h-52 w-full object-cover sm:h-full"
+            className="h-72  w-full object-cover sm:h-full"
           />
 
           {/* Likes Badge */}
           <span className="flex items-center gap-1 absolute top-2 left-2 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow">
             <CiHeart size={20} className="text-gray-700" />
-            <p className="text-sm text-gray-800 font-medium">234</p>
+            <p className="text-sm text-gray-800 font-medium">{recipe?.likes?.length}</p>
           </span>
-        </div>
+        </Link>
 
         {/* --- Content Section --- */}
         <div className="flex flex-col justify-between p-4 flex-grow">
@@ -53,7 +53,7 @@ function RecipeCard({ recipe }) {
                 <span className="flex items-center gap-1">
                   <CiUser />
                   <p>Serves: {recipe?.serves}</p>
-                </span>
+                </span> 
                 <span className="flex items-center gap-1">
                   <CiTimer />
                   <p>Cook Time: {recipe?.cookTime}</p>
@@ -63,24 +63,21 @@ function RecipeCard({ recipe }) {
           </Link>
 
           {/* --- User Info (non-clickable) --- */}
-          <div
-            className="flex items-center gap-2 mt-4 sm:mt-2 cursor-default"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
+          <Link
+          to={`/profile/${recipe?.user?._id}`}
+            className="flex items-center gap-2 mt-4 sm:mt-2 cursor-pointer w-fit"
           >
             <img
-              src={recipe?.user?.avatar}
-              alt={recipe?.user?.name}
+              src={recipe?.user?.avatar||'/public/cheflogo.png' }
+              alt={recipe?.user?.name} 
               className="h-8 w-8 rounded-full object-cover"
             />
             <p className="text-sm capitalize text-gray-800 font-medium">
               {recipe?.user?.name}
             </p>
-          </div>
+          </Link>
         </div>
-      </div>
+      </div>  
     </div>
   );
 }

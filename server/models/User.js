@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
   avatar: { type: String }, // cloudinary url
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' }],
+   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

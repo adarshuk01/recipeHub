@@ -87,7 +87,7 @@ const RecipeStep = ({ step, index, onStepChange, onImageUpload, onRemove, onEdit
           {step.images?.map((img, imgIndex) => (
             <div key={imgIndex} className="relative group">
               <img
-                src={URL.createObjectURL(img)}
+               src={typeof img === "string" ? img : URL.createObjectURL(img)}
                 alt={`step-${index}-img-${imgIndex}`}
                 className="w-16 h-16 rounded-lg object-cover border"
               />
@@ -129,24 +129,30 @@ const RecipeStep = ({ step, index, onStepChange, onImageUpload, onRemove, onEdit
 
 // --- Main Component ---
 
-const RecipeForm = () => {
-  const { createRecipe,loading } = useRecipeContext();
+const RecipeForm = ({ initialData = {}, onSubmit, loading }) => {
+  const [ingredients, setIngredients] = useState(
+    initialData.ingredients
+      ? initialData.ingredients.map((name, i) => ({ id: Date.now() + i, name }))
+      : [{ id: Date.now(), name: "" }]
+  );
+  const [steps, setSteps] = useState(
+  initialData.steps
+    ? initialData.steps.map((step, i) => ({
+        id: Date.now() + i,
+        text: step.text,
+        images: step.images || [], // These may be URLs
+      }))
+    : [{ id: Date.now(), text: "", images: [] }]
+);
 
-  const [ingredients, setIngredients] = useState([
-    { id: Date.now() + 1, name: "250g flour" },
-    { id: Date.now() + 2, name: "100ml water" },
-  ]);
-  const [steps, setSteps] = useState([
-    { id: Date.now() + 3, text: "Mix the flour and water until they thicken", images: [] },
-  ]);
-  const [recipeTitle, setRecipeTitle] = useState(" ");
-  const [description,setdescription]=useState('')
-  const [cookTime, setCookTime] = useState("1hr 30 mins");
-  const [serves, setServes] = useState("2 people");
-  const [mainPhoto, setMainPhoto] = useState(null);
+  const [recipeTitle, setRecipeTitle] = useState(initialData.title || "");
+  const [description, setDescription] = useState(initialData.description || "");
+  const [cookTime, setCookTime] = useState(initialData.cookTime || "");
+  const [serves, setServes] = useState(initialData.serves || "");
+  const [mainPhoto, setMainPhoto] = useState(initialData.mainPhoto || null);
 
-  // --- Ingredient Handlers ---
-  const handleAddIngredient = () => {
+
+       const handleAddIngredient = () => {
     setIngredients([...ingredients, { id: Date.now(), name: "" }]);
   };
 
@@ -212,41 +218,44 @@ const RecipeForm = () => {
     }
   };
 
-  // --- Submit ---
-const handleSubmit = (e) => {
-  e.preventDefault();
-  const formData = new FormData();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  formData.append("title", recipeTitle);
-  formData.append("cookTime", cookTime);
-   formData.append("description", description);
-  formData.append("serves", serves);
-  if (mainPhoto) formData.append("mainPhoto", mainPhoto);
+    const formData = new FormData();
 
-  // Ingredients
-  formData.append(
-    "ingredients",
-    JSON.stringify(ingredients.map((i) => i.name))
-  );
+    formData.append("title", recipeTitle);
+    formData.append("cookTime", cookTime);
+    formData.append("description", description);
+    formData.append("serves", serves);
+    if (mainPhoto) formData.append("mainPhoto", mainPhoto);
 
-  // Steps text as JSON
-  formData.append(
-    "steps",
-    JSON.stringify(steps.map((step) => ({ text: step.text })))
-  );
+    formData.append(
+      "ingredients",
+      JSON.stringify(ingredients.map((i) => i.name))
+    );
+    formData.append(
+  "steps",
+  JSON.stringify(steps.map((step) => ({
+    text: step.text,
+    images: step.images.map((img) =>
+      typeof img === "string" ? img : null
+    ).filter(Boolean) // keep only existing images (URLs)
+  })))
+);
 
-  // Step images + step index
-  steps.forEach((step, idx) => {
-    step.images.forEach((img) => {
-      formData.append("stepImages", img);         // file
-      formData.append("stepImageIndex", idx);     // corresponding step index
-    });
+    steps.forEach((step, trueIndex) => {
+  step.images.forEach((img) => {
+    if (typeof img !== "string") {
+      // Only include newly uploaded files
+      formData.append("stepImages", img);
+      formData.append("stepImageIndex", trueIndex);
+    }
   });
-
-  createRecipe(formData);
-};
+});
 
 
+    onSubmit(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="  relative h-fit  font-sans">
@@ -266,7 +275,7 @@ const handleSubmit = (e) => {
           <div className="mb-8 p-6 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 flex flex-col items-center justify-center text-gray-500 relative group">
             {mainPhoto ? (
               <img
-                src={URL.createObjectURL(mainPhoto)}
+                 src={typeof mainPhoto === "string" ? mainPhoto : URL.createObjectURL(mainPhoto)}
                 alt="Recipe"
                 className="w-full h-48 object-cover rounded-lg mb-3"
               />
@@ -317,6 +326,7 @@ const handleSubmit = (e) => {
           <h1 className="text-lg font- text-gray-900 mb-4">
             <input
               type="text"
+              value={recipeTitle}
              
               onChange={(e) => setRecipeTitle(e.target.value)}
               className="w-full focus:outline-none p-1 border border-gray-200"
@@ -379,7 +389,7 @@ const handleSubmit = (e) => {
           <div className="mb-8">
             <textarea
               rows={3}
-              onChange={(e) => setdescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full p-3 border border-gray-200 rounded-lg text-sm text-gray-700  resize-none"
               placeholder="Share more about this dish..."
             />
@@ -454,4 +464,5 @@ const handleSubmit = (e) => {
 };
 
 export default RecipeForm;
+
 

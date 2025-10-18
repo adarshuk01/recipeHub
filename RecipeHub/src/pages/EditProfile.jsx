@@ -88,7 +88,7 @@ const EditProfile = () => {
       {/* Buttons */}
       <div className="flex gap-2 mt-6">
         <Button loading={loading} variant="primary" onClick={handleSubmit}>Update</Button>
-        <Link to={'/profile'}>
+        <Link to={`/profile/${user._id}`}>
         <Button variant="secondary">Cancel</Button>
         </Link>
       </div>

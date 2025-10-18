@@ -2,6 +2,7 @@ import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../axiosInstance";
 
 export const AuthContext = createContext();
 
@@ -18,7 +19,7 @@ export function AuthProvider({ children }) {
     if (!token) return;
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/me", {
+      const res = await axiosInstance.get("/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(res);
@@ -40,8 +41,8 @@ export function AuthProvider({ children }) {
   const register = async (formData) => {
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
+      const res = await axiosInstance.post(
+        "/auth/register",
         formData
       );
       setToken(res.data.token);
@@ -63,8 +64,8 @@ export function AuthProvider({ children }) {
   const login = async (formData) => {
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
+      const res = await axiosInstance.post(
+        "/auth/login",
         formData
       );
       setToken(res.data.token);
@@ -73,7 +74,7 @@ export function AuthProvider({ children }) {
       toast.success("Login successful 🚀");
       return res.data;
     } catch (err) {
-      const msg = err.response?.data?.message || "Invalid credentials";
+      const msg = err.response?.data?.message || "Something went wrong";
       toast.error(msg);
       return null;
     } finally {
@@ -95,8 +96,11 @@ const editProfile = async (formData) => {
   setLoading(true);
 
   try {
-    const res = await axios.put(
-      "http://localhost:5000/api/users/profile",
+     // Show loading toast
+        const toastId = toast.loading("Updating profile..");
+
+    const res = await axiosInstance.put(
+      "/users/profile",
       formData,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -104,10 +108,14 @@ const editProfile = async (formData) => {
     );
 
     setUser(res.data);
+     // Dismiss loading and show success
+        toast.dismiss(toastId);
     toast.success("Profile Updated");
     fetchProfile();
-    navigate('/profile')
+    navigate(`/profile/${res.data._id}`)
   } catch (err) {
+     // Dismiss loading and show success
+        toast.dismiss();
     toast.error("Failed to Update profile");
     console.error(err);
   } finally {
